@@ -8,8 +8,6 @@ public class Main {
         Deck deck = new Deck();
         List<String> matchingRanks1;
         List<String> matchingRanks2;
-        String highestInput1 = "";
-        String highestInput2 = "";
         String winnerName = "";
         deck.Shuffle();
 
@@ -28,36 +26,28 @@ public class Main {
         int length1 = cardvalue1.length;
         int length2 = cardvalue2.length;
 
-        if (length1 > 0) highestInput1 = (cardvalue1[0]);
-        if (length2 > 0) highestInput2 = (cardvalue2[0]);
-
-        //System.out.println(matchingRanks1);
-        //System.out.println(matchingRanks2);
-
-        int highestValue1 = p1.HighestValue(highestInput1);
-        int highestValue2 = p2.HighestValue(highestInput2);
-        System.out.println();
-        if (p1.flush()) {
-            System.out.println(p1.playername + " got a flush!");
-            System.out.println(p1.playername + " has won!");
-        }
-        if (p2.flush()) {
-            System.out.println(p2.playername + " got a flush!");
-            System.out.println(p2.playername + " has won!");
-        }
         Players.Player player1 = new Players.Player(p1.playerhand);
         Players.Player player2 = new Players.Player(p2.playerhand);
+        Players.Player c1 = new Players.Player(List.of(cardvalue1));
+        Players.Player c2 = new Players.Player(List.of(cardvalue2));
 
+        int comparisonResultValue = Players.compareHands(c1, c2);
         int comparisonResult = Players.compareHands(player1, player2);
-        //System.out.println(comparisonResult);
+
+        System.out.println();
+
+        if (p1.flush()) {
+            System.out.println(p1.playername + " got a flush!");
+            winnerName = p1.playername;
+        }
         switch (length1) {
             case 2:
                 if (!p1.findMatchingRanks().isEmpty()) {
                     System.out.println(p1.playername + " has two pairs!: " + matchingRanks1);
-                    if (length1 > length2) {
+                    if (length1 > length2 && !p1.flush() && !p2.flush()) {
                         winnerName = p1.playername;
                         break;
-                    } else if (length1 == length2 && highestValue1 > highestValue2) {
+                    } else if (length1 == length2 && comparisonResultValue == 1 && !p1.flush() && !p2.flush()) {
                         winnerName = p1.playername;
                         break;
                     } else
@@ -66,24 +56,30 @@ public class Main {
             case 1:
                 if (!p1.findMatchingRanks().isEmpty()) {
                     System.out.println(p1.playername + " has a pair of: " + matchingRanks1);
-                    if (length1 > length2) {
+                    if (length1 > length2 && !p1.flush() && !p2.flush()) {
                         winnerName = p1.playername;
                         break;
-                    } else if (length1 == length2 && highestValue1 > highestValue2) {
+                    } else if (length1 == length2 && comparisonResultValue == 1 && !p1.flush() && !p2.flush()) {
                         winnerName = p1.playername;
                         break;
-                    } else
+                    } else if (length1 == length2 && comparisonResultValue == 0 && !p1.flush() && !p2.flush() && comparisonResult > 0) {
+                        winnerName = p1.playername;
+                    }
                         break;
                 }
+        }
+        if (p2.flush()) {
+            System.out.println(p2.playername + " got a flush!");
+            winnerName = p2.playername;
         }
         switch (length2) {
             case 2:
                 if (!p2.findMatchingRanks().isEmpty()) {
                     System.out.println(p2.playername + " has two pairs!: " + matchingRanks2);
-                    if (length2 > length1) {
+                    if (length2 > length1  && !p1.flush() && !p2.flush()) {
                         winnerName = p2.playername;
                         break;
-                    } else if (length2 == length1 && highestValue2 > highestValue1) {
+                    } else if (length2 == length1 && comparisonResultValue == -1 && !p1.flush() && !p2.flush()) {
                         winnerName = p2.playername;
                         break;
                     } else
@@ -92,13 +88,15 @@ public class Main {
             case 1:
                 if (!p2.findMatchingRanks().isEmpty()) {
                     System.out.println(p2.playername + " has a pair of: " + matchingRanks2);
-                    if (length2 > length1) {
+                    if (length2 > length1  && !p1.flush() && !p2.flush()) {
                         winnerName = p2.playername;
                         break;
-                    } else if (length2 == length1 && highestValue2 > highestValue1) {
+                    } else if (length2 == length1 && comparisonResultValue == -1 && !p1.flush() && !p2.flush()) {
                         winnerName = p2.playername;
                         break;
-                    } else
+                    } else if (length2 == length1 && comparisonResultValue == 0 && !p1.flush() && !p2.flush() && comparisonResult < 0) {
+                        winnerName = p2.playername;
+                    }
                         break;
                 }
         }
@@ -113,10 +111,9 @@ public class Main {
             else if (comparisonResult == 0) {
                 System.out.println("It's a Tie!");
             }
-            else
-            System.out.println(winnerName);
         }
         else {
+            System.out.println();
             System.out.println(winnerName + " has won!");
         }
     }
@@ -124,14 +121,10 @@ public class Main {
 
 class Players {
     String playername;
-    //static int numberofplayers = 0;
-    //int playernumber;
     List<String> playerhand;
 
     Players(String name) {
-        //numberofplayers++;
         playername = name;
-        //playernumber = numberofplayers;
         playerhand = new ArrayList<>();
     }
 
@@ -163,7 +156,6 @@ class Players {
 
     public void showHand() {
         System.out.println();
-        //System.out.println("Player Number: " + playernumber);
         System.out.println("Player Name: " + playername);
         System.out.println("Player Cards:");
         for (String deck : playerhand) {
@@ -219,7 +211,7 @@ class Players {
 
         return matchingRanks;
     }
-    // Helper method to calculate the total value of a hand using the map
+
     private static int calculateHighestCardValue(List<String> hand) {
         int highestValue = 0;
 
@@ -231,28 +223,6 @@ class Players {
 
         return highestValue;
     }
-
-    int HighestValue(String highestInput) {
-        int highestvalue = 0;
-        highestvalue = switch (highestInput) { //checks value of first pair
-            case "2" -> 2;
-            case "3" -> 3;
-            case "4" -> 4;
-            case "5" -> 5;
-            case "6" -> 6;
-            case "7" -> 7;
-            case "8" -> 8;
-            case "9" -> 9;
-            case "10" -> 10;
-            case "J" -> 11;
-            case "Q" -> 12;
-            case "K" -> 13;
-            case "A" -> 14;
-            default -> highestvalue;
-        };
-        return highestvalue;
-    }
-    //class PlayerHandComparator {
 
     private static final Map<String, Integer> cardValues = new HashMap<>();
 
