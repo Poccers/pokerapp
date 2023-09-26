@@ -15,8 +15,10 @@ public class Main {
             p1.getCard(deck.DealCards());
             p2.getCard(deck.DealCards());
         }
+
         p1.showHand();
         p2.showHand();
+
 
         matchingRanks1 = p1.findMatchingRanks();
         matchingRanks2 = p2.findMatchingRanks();
@@ -25,94 +27,126 @@ public class Main {
         String[] cardvalue2 = matchingRanks2.toArray(new String[0]);
         int length1 = cardvalue1.length;
         int length2 = cardvalue2.length;
-
-        Players.Player player1 = new Players.Player(p1.playerhand);
-        Players.Player player2 = new Players.Player(p2.playerhand);
         Players.Player c1 = new Players.Player(List.of(cardvalue1));
         Players.Player c2 = new Players.Player(List.of(cardvalue2));
+
+        Players.Player player1 = new Players.Player(p1.extractRanks(p1.playerhand));
+        Players.Player player2 = new Players.Player(p2.extractRanks(p2.playerhand));
+
+        int duplicateCards1 = player1.findDuplicateCardCount();
+        int duplicateCards2 = player2.findDuplicateCardCount();
+
+        //List<String> testHand = new ArrayList<>();
+        //testHand = List.of(new String[]{String.valueOf(2), String.valueOf(3), String.valueOf(4), String.valueOf(5), String.valueOf(6)});
+
+        boolean isStraight1 = player1.isStraight(player1.getHand());
+        boolean isStraight2 = player2.isStraight(player2.getHand());
+
+        boolean straightFlush1 = p1.StraightFlush(isStraight1, p1.flush());
+        boolean straightFlush2 = p2.StraightFlush(isStraight2, p1.flush());
 
         int comparisonResultValue = Players.compareHands(c1, c2);
         int comparisonResult = Players.compareHands(player1, player2);
 
         System.out.println();
-
-        if (p1.flush()) {
+        if (straightFlush1) {
+            System.out.println(p1.playername + " got a straight flush!");
+            winnerName = p1.playername;
+        }else if (duplicateCards1 == 4 && !straightFlush2) {
+            System.out.println(p1.playername + " has 4 of a kind!");
+            winnerName = p1.playername;
+        } else if (p1.flush() && !straightFlush2 && duplicateCards2 < 4) {
             System.out.println(p1.playername + " got a flush!");
             winnerName = p1.playername;
-        }
-        switch (length1) {
-            case 2:
-                if (!p1.findMatchingRanks().isEmpty()) {
-                    System.out.println(p1.playername + " has two pairs!: " + matchingRanks1);
-                    if (length1 > length2 && !p1.flush() && !p2.flush()) {
-                        winnerName = p1.playername;
-                        break;
-                    } else if (length1 == length2 && comparisonResultValue == 1 && !p1.flush() && !p2.flush()) {
-                        winnerName = p1.playername;
-                        break;
-                    } else
-                        break;
-                }
-            case 1:
-                if (!p1.findMatchingRanks().isEmpty()) {
-                    System.out.println(p1.playername + " has a pair of: " + matchingRanks1);
-                    if (length1 > length2 && !p1.flush() && !p2.flush()) {
-                        winnerName = p1.playername;
-                        break;
-                    } else if (length1 == length2 && comparisonResultValue == 1 && !p1.flush() && !p2.flush()) {
-                        winnerName = p1.playername;
-                        break;
-                    } else if (length1 == length2 && comparisonResultValue == 0 && !p1.flush() && !p2.flush() && comparisonResult > 0) {
-                        winnerName = p1.playername;
+        } else if (isStraight1 && !p2.flush() && duplicateCards2 < 4 && !straightFlush2) {
+            System.out.println(p1.playername + " got a straight!");
+            winnerName = p1.playername;
+        } else if (duplicateCards1 == 3 && !isStraight2 && !p2.flush() && !straightFlush2) {
+            System.out.println(p1.playername + " has three of a kind!");
+            winnerName = p1.playername;
+        } else {
+            switch (length1) {
+                case 2:
+                    if (!p1.findMatchingRanks().isEmpty()) {
+                        System.out.println(p1.playername + " has two pairs!: " + matchingRanks1);
+                        if (length1 > length2 && !isStraight2 && !p2.flush() && duplicateCards2 < 3) {
+                            winnerName = p1.playername;
+                            break;
+                        } else if (length1 == length2 && comparisonResultValue == 1 && !isStraight2 && !p2.flush() && duplicateCards2 < 3) {
+                            winnerName = p1.playername;
+                            break;
+                        } else
+                            break;
                     }
+                case 1:
+                    if (!p1.findMatchingRanks().isEmpty()) {
+                        System.out.println(p1.playername + " has a pair of: " + matchingRanks1);
+                        if (length1 > length2 && !isStraight2 && !p2.flush() && duplicateCards2 < 3) {
+                            winnerName = p1.playername;
+                            break;
+                        } else if (length1 == length2 && comparisonResultValue == 1 && !isStraight2 && !p2.flush() && duplicateCards2 < 3) {
+                            winnerName = p1.playername;
+                            break;
+                        } else if (length1 == length2 && comparisonResultValue == 0 && comparisonResult > 0 && !isStraight2 && !p2.flush() && duplicateCards2 < 3) {
+                            winnerName = p1.playername;
+                        }
                         break;
-                }
+                    }
+            }
         }
-        if (p2.flush()) {
+        if (straightFlush2) {
+            System.out.println(p2.playername + " got a straight flush!");
+        }else if (duplicateCards2 == 4 && !straightFlush1) {
+            System.out.println(p2.playername + " has 4 of a kind!");
+            winnerName = p2.playername;
+        } else if (p2.flush() && !p1.flush() && duplicateCards1 < 4 && !straightFlush1) {
             System.out.println(p2.playername + " got a flush!");
             winnerName = p2.playername;
-        }
-        switch (length2) {
-            case 2:
-                if (!p2.findMatchingRanks().isEmpty()) {
-                    System.out.println(p2.playername + " has two pairs!: " + matchingRanks2);
-                    if (length2 > length1  && !p1.flush() && !p2.flush()) {
-                        winnerName = p2.playername;
-                        break;
-                    } else if (length2 == length1 && comparisonResultValue == -1 && !p1.flush() && !p2.flush()) {
-                        winnerName = p2.playername;
-                        break;
-                    } else
-                        break;
-                }
-            case 1:
-                if (!p2.findMatchingRanks().isEmpty()) {
-                    System.out.println(p2.playername + " has a pair of: " + matchingRanks2);
-                    if (length2 > length1  && !p1.flush() && !p2.flush()) {
-                        winnerName = p2.playername;
-                        break;
-                    } else if (length2 == length1 && comparisonResultValue == -1 && !p1.flush() && !p2.flush()) {
-                        winnerName = p2.playername;
-                        break;
-                    } else if (length2 == length1 && comparisonResultValue == 0 && !p1.flush() && !p2.flush() && comparisonResult < 0) {
-                        winnerName = p2.playername;
+        } else if (isStraight2 && !p1.flush() && duplicateCards1 < 4 && !straightFlush1) {
+            System.out.println(p2.playername + " got a straight!");
+            winnerName = p2.playername;
+        } else if (duplicateCards2 == 3 && !isStraight1 && !p1.flush() && !straightFlush1) {
+            System.out.println(p2.playername + " has three of a kind!");
+            winnerName = p2.playername;
+        } else {
+            switch (length2) {
+                case 2:
+                    if (!p2.findMatchingRanks().isEmpty()) {
+                        System.out.println(p2.playername + " has two pairs!: " + matchingRanks2);
+                        if (length2 > length1 && !isStraight1 && !p1.flush() && duplicateCards1 < 3) {
+                            winnerName = p2.playername;
+                            break;
+                        } else if (length2 == length1 && comparisonResultValue == -1 && !isStraight1 && !p1.flush() && duplicateCards1 < 3) {
+                            winnerName = p2.playername;
+                            break;
+                        } else
+                            break;
                     }
+                case 1:
+                    if (!p2.findMatchingRanks().isEmpty()) {
+                        System.out.println(p2.playername + " has a pair of: " + matchingRanks2);
+                        if (length2 > length1 && !isStraight1 && !p1.flush() && duplicateCards1 < 3) {
+                            winnerName = p2.playername;
+                            break;
+                        } else if (length2 == length1 && comparisonResultValue == -1 && !isStraight1 && !p1.flush() && duplicateCards1 < 3) {
+                            winnerName = p2.playername;
+                            break;
+                        } else if (length2 == length1 && comparisonResultValue == 0 && comparisonResult < 0 && !isStraight1 && !p1.flush() && duplicateCards1 < 3) {
+                            winnerName = p2.playername;
+                        }
                         break;
-                }
+                    }
+            }
         }
-
-        if (winnerName.isEmpty() && !p1.flush() && !p2.flush()) {
+        if (winnerName.isEmpty()) {
             if (comparisonResult > 0) {
-                System.out.println(p1.playername+ " has won due to highest card!");
-            }
-            else if (comparisonResult < 0) {
-                System.out.println(p2.playername+ " has won due to highest card!");
-            }
-            else if (comparisonResult == 0) {
+                System.out.println(p1.playername + " has won due to highest card!");
+            } else if (comparisonResult < 0) {
+                System.out.println(p2.playername + " has won due to highest card!");
+            } else if (comparisonResult == 0) {
                 System.out.println("It's a Tie!");
             }
-        }
-        else {
+        } else {
             System.out.println();
             System.out.println(winnerName + " has won!");
         }
@@ -126,6 +160,7 @@ class Players {
     Players(String name) {
         playername = name;
         playerhand = new ArrayList<>();
+
     }
 
     public static class Player {
@@ -138,6 +173,54 @@ class Players {
         public List<String> getHand() {
             return hand;
         }
+        public int findDuplicateCardCount() {
+            Map<String, Integer> cardCounts = new HashMap<>();
+
+            for (String card : hand) {
+                cardCounts.put(card, cardCounts.getOrDefault(card, 0) + 1);
+            }
+            int highestCount = 0;
+            for (int count : cardCounts.values()) {
+                if (count > highestCount) {
+                    highestCount = count;
+                }
+            }
+
+            return highestCount;
+        }
+        public boolean isStraight(List<String> hand) {
+            if (hand == null || hand.size() != 5) {
+                return false;
+            } else {
+
+                int[] values = new int[5];
+                int index = 0;
+
+                for (String card : hand) {
+                    String rank = extractRank(card);
+                    values[index++] = cardValues.getOrDefault(rank, 0);
+                }
+                Arrays.sort(values);
+                int prev = -1;
+
+                for (int i = 0; i < values.length; i++) {
+
+                    if (prev == -1 || (prev + 1) == values[i]) {
+                        prev = values[i];
+                    } else {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+    }
+    public boolean StraightFlush(boolean straight, boolean flush) {
+        boolean straightflush = false;
+        if (straight && flush) {
+            straightflush = true;
+        }
+        return straightflush;
     }
 
     public static int compareHands(Player player1, Player player2) {
@@ -149,6 +232,8 @@ class Players {
 
         return Integer.compare(highestValue1, highestValue2);
     }
+
+
     void getCard(String deck) {
         playerhand.add(deck);
 
@@ -181,7 +266,7 @@ class Players {
             ranks.add(extractRank(card));
         }
 
-        return ranks; // Add this return statement to return the ranks list.
+        return ranks;
     }
 
     boolean flush() {
@@ -269,6 +354,3 @@ class Deck {
             return null;
     }
 }
-
-
-
